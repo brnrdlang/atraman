@@ -1,0 +1,44 @@
+<CalendarWidget>:
+    
+    orientation: 'vertical'
+        
+    BoxLayout:
+        orientation: 'horizontal'
+        Button:
+            text: '<<'
+            on_press: root.do_month_before()
+                    
+        Label:
+            id: month
+            text: root.month
+                   
+        Label:
+            id: year
+            text: root.year
+                    
+        Button:
+            text: '>>'
+            on_press: root.do_month_next()
+        
+    GridLayout:
+        cols: 7
+        Label:
+            text: 'Mo'
+        Label:
+            text: 'Di'
+        Label:
+            text: 'Mi'
+        Label:
+            text: 'Do'
+        Label:
+            text: 'Fr'
+        Label:
+            text: 'Sa'
+        Label:
+            text: 'So'
+<CalendarScreen>:
+    CalendarWidget:
+
+<MenuScreen>:
+    Label:
+        text: 'todo :('

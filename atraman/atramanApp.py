@@ -12,7 +12,7 @@ class MenuScreen(Screen):
 sm = ScreenManager()
 sm.add_widget(CalendarScreen(name='calendar'))
 
-class AtramanApp():
+class AtramanApp(App):
 
     def build(self):
         return sm
