@@ -1,9 +1,11 @@
+#:kivy 1.8.0
 <CalendarWidget>:
     
     orientation: 'vertical'
-        
+    calendar_layout: cal
     BoxLayout:
         orientation: 'horizontal'
+        size_hint_y: 0.15
         Button:
             text: '<<'
             on_press: root.do_month_before()
@@ -22,6 +24,8 @@
         
     GridLayout:
         cols: 7
+        size_hint_y: 0.15
+        id: calendar
         Label:
             text: 'Mo'
         Label:
@@ -36,6 +40,11 @@
             text: 'Sa'
         Label:
             text: 'So'
+
+    GridLayout:
+        cols: 7
+        id: cal
+
 <CalendarScreen>:
     CalendarWidget:
 
