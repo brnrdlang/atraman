@@ -26,21 +26,29 @@ class CalendarWidget(BoxLayout):
     calendar_layout = ObjectProperty(None)
     calendar_btns = ListProperty([])
     calendar = ObjectProperty(Calendar())
+    date = ObjectProperty(date.today())
 
     def __init__(self, **kwargs):
         super(CalendarWidget, self).__init__(**kwargs)
 
-        self.date = date.today()
+        #self.date = date.today()
         self.month = self.date.strftime('%B')
         self.year = str(self.date.year)
 
-    def on_calendar_layout(self, instnce, value):
+    def on_calendar_layout(self, instance, value):
         self.create_calendar()
+
+    def on_date(self, instance, value):
+        self.create_calendar()
+        self.month = self.date.strftime('%B')
+        self.year = str(self.date.year)
 
     def create_calendar(self):
         self.calendar_layout.clear_widgets()
         def do_day_clicked(instance):
             pass
+
+        self.calendar_btns = []
 
         for week in self.calendar.monthdatescalendar(self.date.year, self.date.month):
             self.calendar_btns.extend([DateButton(date, do_day_clicked,text=str(date.day), name=str(date))
@@ -50,10 +58,16 @@ class CalendarWidget(BoxLayout):
             self.calendar_layout.add_widget(btn)
 
     def do_month_before(self):
-        self.date = date(self.date.year, self.date.month - 1, 1)
+        if (self.date.month == 1):
+            self.date = date(self.date.year -1, 12, 1)
+        else:
+            self.date = date(self.date.year, self.date.month - 1, 1)
 
     def do_month_next(self):
-        pass
+        if (self.date.month == 12):
+            self.date = date(self.date.year + 1, 1, 1)
+        else:
+            self.date = date(self.date.year, self.date.month +1, 1)
 
     
 #will be used later when there is more than the calendar
