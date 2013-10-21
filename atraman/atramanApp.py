@@ -7,6 +7,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
+from kivy.uix.modalview import ModalView
 import os
 
 pwd = os.path.dirname(__file__)
@@ -46,6 +47,7 @@ class CalendarWidget(BoxLayout):
     def create_calendar(self):
         self.calendar_layout.clear_widgets()
         def do_day_clicked(instance):
+            #TODO show options for this date
             pass
 
         self.calendar_btns = []
@@ -69,6 +71,8 @@ class CalendarWidget(BoxLayout):
         else:
             self.date = date(self.date.year, self.date.month +1, 1)
 
+class DayMenu(ModalView):
+    pass
     
 #will be used later when there is more than the calendar
 class MenuScreen(Screen):
