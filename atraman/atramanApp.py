@@ -1,3 +1,5 @@
+# -*- coding: latin-1 -*- 
+
 from datetime import datetime, date
 from calendar import Calendar
 from kivy.app import App
@@ -16,7 +18,10 @@ class DateButton(Button):
     def __init__(self, date, callback, **kwargs):
         super(DateButton, self).__init__(**kwargs)
         self.date = date
-        self.bind(on_press = callback)
+        self.bind(on_press = self.press)
+
+    def press(self, instance):
+        sm.switch_to(DayWidget(date))
 
 #Builder.load_file(os.path.join(pwd, 'calendar.kv'))
 
@@ -46,14 +51,11 @@ class CalendarWidget(BoxLayout):
 
     def create_calendar(self):
         self.calendar_layout.clear_widgets()
-        def do_day_clicked(instance):
-            #TODO show options for this date
-            pass
 
         self.calendar_btns = []
 
         for week in self.calendar.monthdatescalendar(self.date.year, self.date.month):
-            self.calendar_btns.extend([DateButton(date, do_day_clicked,text=str(date.day), name=str(date))
+            self.calendar_btns.extend([DateButton(date, text=str(date.day), name=str(date))
                              for date in week])
 
         for btn in self.calendar_btns:
@@ -71,9 +73,25 @@ class CalendarWidget(BoxLayout):
         else:
             self.date = date(self.date.year, self.date.month +1, 1)
 
-class DayMenu(ModalView):
-    pass
-    
+class DayWidget(BoxLayout):
+    datestr = StringProperty('')
+
+    def __init__(self, day, **kwargs): 
+        super(DayWidget, self).__init__(**kwargs)
+        datestr = day.strftime('%A, den %d. %B %Y')
+        entrylist = getEntries(day) #TODO write getEntries
+        for entry in entrylist:
+            self.add_widget(entry)
+
+def getEntries(day):
+    layout = BoxLayout()
+    ort = Label(text='Stadion Kieselhumes')
+    time = Label(text='18:00')
+    training = Label(text='some random text with little bit of adsölfjdaslfjvkjhflj')
+    layout.add_widget(ort)
+    layout.add_widget(time)
+    layout.add_widget(training)
+
 #will be used later when there is more than the calendar
 class MenuScreen(Screen):
     pass
