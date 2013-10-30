@@ -10,18 +10,19 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.uix.modalview import ModalView
+from kivy.uix.label import Label
 import os
 
 pwd = os.path.dirname(__file__)
 
 class DateButton(Button):
-    def __init__(self, date, callback, **kwargs):
+    def __init__(self, date, **kwargs):
         super(DateButton, self).__init__(**kwargs)
         self.date = date
         self.bind(on_press = self.press)
 
     def press(self, instance):
-        sm.switch_to(DayWidget(date))
+        sm.switch_to(DayScreen(self.date))
 
 #Builder.load_file(os.path.join(pwd, 'calendar.kv'))
 
@@ -73,24 +74,37 @@ class CalendarWidget(BoxLayout):
         else:
             self.date = date(self.date.year, self.date.month +1, 1)
 
-class DayWidget(BoxLayout):
+class DayScreen(Screen):
     datestr = StringProperty('')
 
     def __init__(self, day, **kwargs): 
-        super(DayWidget, self).__init__(**kwargs)
+        super(DayScreen, self).__init__(**kwargs)
         datestr = day.strftime('%A, den %d. %B %Y')
         entrylist = getEntries(day) #TODO write getEntries
-        for entry in entrylist:
-            self.add_widget(entry)
+
+        layout = BoxLayout(orientation='vertical')
+
+	layout.add_widget(Label(text=datestr))
+        
+	for entry in entrylist:
+            layout.add_widget(entry)
+
+        def click_it(instance):
+            sm.switch_to(CalendarScreen(name='calendar'))
+
+	layout.add_widget(Button(text='zurück', on_press=click_it))
+
+        self.add_widget(layout)
 
 def getEntries(day):
-    layout = BoxLayout()
+    layout = BoxLayout(orientation='vertical')
     ort = Label(text='Stadion Kieselhumes')
     time = Label(text='18:00')
     training = Label(text='some random text with little bit of adsölfjdaslfjvkjhflj')
     layout.add_widget(ort)
     layout.add_widget(time)
     layout.add_widget(training)
+    return [layout]
 
 #will be used later when there is more than the calendar
 class MenuScreen(Screen):
