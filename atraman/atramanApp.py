@@ -84,17 +84,17 @@ class DayScreen(Screen):
 
         layout = BoxLayout(orientation='vertical')
 
-	layout.add_widget(Label(text=datestr))
+    layout.add_widget(Label(text=datestr))
         
-	for entry in entrylist:
-            layout.add_widget(entry)
+    for entry in entrylist:
+        layout.add_widget(entry)
 
         def click_it(instance):
             sm.switch_to(CalendarScreen(name='calendar'))
 
-	layout.add_widget(Button(text='zurück', on_press=click_it))
+    layout.add_widget(Button(text='zurück', on_press=click_it))
 
-        self.add_widget(layout)
+    self.add_widget(layout)
 
 def getEntries(day):
     layout = BoxLayout(orientation='vertical')
