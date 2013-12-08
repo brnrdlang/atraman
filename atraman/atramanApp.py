@@ -12,10 +12,24 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.uix.modalview import ModalView
 from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.textinput import TextInput
 import os
 import sqlite3
 
+def init_db():
+    """Initializes database and returns Connection Object."""
+    conn = sqlite3.connect(pwd + "/" + config.DB_PATH)
+    cur = conn.cursor()
+    cur.execute("PRAGMA table_info(training)")
+    if not cur.fetchall():
+        print "No table found: Create new sqlite table in database"
+        cur.execute("CREATE TABLE training (place text, description text, date datetime)")
+
+    return conn
+
 pwd = os.path.dirname(__file__)
+db = init_db()
 
 class DateButton(Button):
     """Button to represent a date in the CalendarWidget.
@@ -128,32 +142,89 @@ class DayScreen(Screen):
         super(DayScreen, self).__init__(**kwargs)
         datestr = day.strftime('%A, den %d. %B %Y')
         entrylist = getEntries(day) #TODO write getEntries
+        
+        scroll = ScrollView()
 
         layout = BoxLayout(orientation='vertical')
 
-        layout.add_widget(Label(text=datestr))
+        layout.add_widget(Label(text=datestr, size_hint_y=None, height=50))
         
         for entry in entrylist:
             layout.add_widget(entry)
 
-            def click_it(instance):
-                sm.switch_to(CalendarScreen(name='calendar'))
+        layout.add_widget(Button(text='Neuer Eintrag', on_press=lambda inst: sm.switch_to(FormScreen(day)), size_hint=(None,None), size=(200,40), pos_hint={'center_x': 0.5}))
 
-        layout.add_widget(Button(text='zurück', on_press=click_it))
+        layout.add_widget(Button(text='Zurück', on_press=lambda inst: sm.switch_to(CalendarScreen(name='calendar')), size_hint=(None,None), size=(200,40), pos_hint={'center_x': 0.5}))
+        
+        scroll.add_widget(layout)
+        self.add_widget(scroll)
+
+class FormScreen(Screen):
+    
+    def __init__(self, day, **kwargs):
+        """Constructor of FormScreen"""
+
+        super(FormScreen, self).__init__(**kwargs)
+
+        layout = BoxLayout(orientation='vertical')
+        form = GridLayout(cols=2, size_hint_x=.7)
+        form.add_widget(Label(text='Ort:', size_hint=(.3, None), height=40))
+        placeInput = TextInput(multiline=False, size_hint_y=None, height=40)
+        form.add_widget(placeInput)
+        form.add_widget(Label(text='Datum:', size_hint=(.3,None), height=40))
+        dateInput = TextInput(multiline=False, text=day.strftime('%d.%m.%Y'), size_hint_y=None, height=40)        
+        form.add_widget(dateInput)
+        form.add_widget(Label(text='Uhrzeit:', size_hint=(.3,None), height=40))
+        timeInput = TextInput(multiline=False, size_hint_y=None, height=40)
+        form.add_widget(timeInput)
+        
+        layout.add_widget(form)
+        desc = TextInput()
+        layout.add_widget(desc)
+        
+        def submit(instance):
+            if not (placeInput.text and dateInput.text and timeInput.text and desc.text):
+                print 'Some input was empty :('
+                return
+            place = unicode(placeInput.text, encoding='utf-8')
+            date = datetime.strptime(dateInput.text + ' ' + timeInput.text, '%d.%m.%Y %H:%M')
+            description = unicode(desc.text, encoding='utf-8')
+            setEntries(place, date, description)
+            print 'Successfully added entry :)'
+            sm.switch_to(DayScreen(day))
+
+        layout.add_widget(Button(text='Eintragen', on_press=submit, size_hint=(None,None),
+            size=(200,40), pos_hint={'center_x': 0.5}))
+        
+        layout.add_widget(Button(text='Zurück', 
+            on_press=lambda inst: sm.switch_to(DayScreen(day)), 
+            size_hint=(None,None), size=(200,40), pos_hint={'center_x': 0.5}))
 
         self.add_widget(layout)
+
+def setEntries(place, date, training):
+    """Creates an entry into the database."""
+    cur = db.cursor()    
+    cur.execute('INSERT INTO training VALUES(?,?,?)', (place, training, date))
+    db.commit()
 
 def getEntries(day):
     """Gets data for given day, returns list of Widgets"""
 
+    cur = db.cursor()
+    return [createLogEntry(entry[0], datetime.strptime(entry[2], '%Y-%m-%d %H:%M:%S'), entry[1]) for entry in cur.execute('SELECT * FROM training WHERE date(date) = date(?)', (day,) )]
+
+def createLogEntry(place, date, description):
+    
     layout = BoxLayout(orientation='vertical')
-    place = Label(text='Stadion Kieselhumes')
-    time = Label(text='18:00')
-    training = Label(text='some random text with little bit of adsölfjdaslfjvkjhflj')
-    layout.add_widget(place)
-    layout.add_widget(time)
-    layout.add_widget(training)
-    return [layout]
+    placeLabel = Label(text=place, size_hint_y=None, height=40)
+    timeLabel = Label(text=date.time().strftime("%H:%M"), size_hint_y=None, height=40)
+    trainingLabel = Label(text=description)
+    layout.add_widget(placeLabel)
+    layout.add_widget(timeLabel)
+    layout.add_widget(trainingLabel)
+        
+    return layout
 
 #will be used later when there is more than the calendar
 class MenuScreen(Screen):
